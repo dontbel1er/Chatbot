@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+       
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <h1>Chat Assistant</h1>
+            <p>Always here to help</p>
+        </div>
+
+        <!-- Messages Container -->
+        <div class="messages-container" id="messagesContainer">
+            <!-- Messages will be inserted here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <div class="input-container">
+                <input
+                    type="text"
+                    id="messageInput"
+                    class="input-field"
+                    placeholder="Type your message..."
+                    autocomplete="off"
+                >
+                <button id="sendButton" class="send-button">
+                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
+        <path d="M476 3.2L12.5 270.6c-18.1 10.4-15.8 35.6 2.2 43.2L121 358.4l287.3-253.2c5.5-4.9 13.3 2.6 8.6 8.3L176 407v80.5c0 23.6 28.5 32.9 42.5 15.8L282 426l124.6 52.2c14.2 6 30.4-2.9 33-18.2l72-432C515 7.8 493.3-6.8 476 3.2z"/>
+    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        let isTyping = false;
+        let step = 'waiting_for_start'
+        let userName = '';
+        let operator = '';
+        
+       
+
+        // Bot icon SVG
+        const botIcon = `<img src="bot_avatar.png" alt="описание" style="display: inline; width: 3em; height: 3em; object-fit: cover; vertical-align: middle;"
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>`;
+
+        // User icon SVG
+        const userIcon = `<img src="user_avatar.png" alt="описание" style="display: inline; width: 3em; height: 3em; object-fit: cover; vertical-align: middle;"
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+        </svg>`;
+
+        function receiveMessage() {
+
+        const message = messageInput.innerText;
+        console.log(message);
+
+        }
+
+        // Format time
+        function formatTime(date) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+
+function checkInput() {
+    let currentLength = messageInput.value.trim().length;
+    
+    if (currentLength > 0) {
+        console.log('больше 0');
+        // return true;
+        sendButton.style.color = '#c4b50a'
+    } else {
+        console.log('равно 0');
+        // return false;
+        sendButton.style.color = 'grey'
+    }
+
+    
+}
+
+
+
+messageInput.addEventListener('input', checkInput);
+
+checkInput()
+
+
+      // Create message element
+        function createMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const now = new Date();
+            const avatar = sender === 'bot' ? botIcon : userIcon;
+
+            messageDiv.innerHTML = `
+                ${sender === 'bot' ? `<div class="avatar bot">${avatar}</div>` : ''}
+                <div class="message-bubble">
+                    <div class="message-text">${text}</div>
+                    <span class="message-time">${formatTime(now)}</span>
+                </div>
+                ${sender === 'user' ? `<div class="avatar user">${avatar}</div>` : ''}
+            `;
+
+            return messageDiv;
+        }
+
+        // Create typing indicator
+        function createTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="avatar bot">${botIcon}</div>
+                <div class="typing-bubble">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            return typingDiv;
+        }
+
+        // Scroll to bottom
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Add message to chat
+        function addMessage(text, sender) {
+            const messageElement = createMessage(text, sender);
+            messagesContainer.appendChild(messageElement);
+            scrollToBottom();
+
+            
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            if (!isTyping) {
+                isTyping = true;
+                const typingIndicator = createTypingIndicator();
+                messagesContainer.appendChild(typingIndicator);
+                scrollToBottom();
+            }
+        }
+
+        // Hide typing indicator
+        function hideTyping() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+                isTyping = false;
+            }
+        }
+
+        // Send message
+        function sendMessage() {
+    const text = messageInput.value.trim();
+    if (text === '') return;
+    
+    receiveMessage(); 
+    
+    // Add user message
+    addMessage(text, 'user');
+    messageInput.value = '';
+    
+    // Show typing indicator
+    showTyping();
+    
+    checkInput();
+    
+    // Simulate bot response
+    setTimeout(() => {
+        hideTyping();
+        
+        
+        if (text === '/stop') {
+                    addMessage('Всего доброго, если хочешь поговорить пиши /start', 'bot');
+        
+        step = 'waiting_for_start';
+        userName = '';
+        savedNum1 = null;
+        savedNum2 = null;
+        messageInput.value = '';
+        return;
+        }
+        
+        if (step === 'waiting_for_start') {
+            if (text === '/start') {
+                addMessage('Привет, меня зовут Чат-бот, а как зовут тебя?', 'bot');
+                step = 'waiting_for_name'; 
+            } else {
+                addMessage('Я не понимаю, введите другую команду!', 'bot');
+            }
+        }
+        else if (step === 'waiting_for_name') {
+            if (text.startsWith('/name:')) {
+                userName = text.slice(6).trim(); 
+                addMessage(`Привет, ${userName}, Приятно познакомиться. Я умею считать, введи числа которые надо посчитать`, 'bot');
+                step = 'waiting_for_numbers'; 
+            } else {
+                addMessage('Я не понимаю, введите другую команду!', 'bot');
+            }
+        }
+        else if (step === 'waiting_for_numbers') {
+    if (text.startsWith('/number:')) { 
+        let numbersPart = text.slice(8).trim();
+        
+        if (numbersPart.includes(',')) {
+            let numbers = numbersPart.split(',');
+            
+            if (numbers.length === 2) {
+                let num1 = parseFloat(numbers[0].trim());
+                let num2 = parseFloat(numbers[1].trim());
+                
+                if (!isNaN(num1) && !isNaN(num2)) {
+                    addMessage(`Теперь выберите оператор (+, -, *, /):`, 'bot');
+                    window.tempNum1 = num1;
+                    window.tempNum2 = num2;
+                    step = 'waiting_for_operator';  
+                } else {
+                    addMessage('Я не понимаю, введите другую команду!');
+                }
+            } else {
+                addMessage('Я не понимаю, введите другую команду!, 9', 'bot');
+            }
+        } else {
+            addMessage('Я не понимаю, введите другую команду!', 'bot');
+        }
+    } else {
+        addMessage('Я не понимаю, введите другую команду!', 'bot');
+    }
+    
+}
+
+else if (step === 'waiting_for_operator')  {
+
+    const num1 = window.tempNum1;
+    const num2 = window.tempNum2;
+if (text.includes('+')) {
+    addMessage(num1+num2, 'bot')
+}
+
+if (text.includes('*')) {
+    addMessage(num1*num2, 'bot')
+}
+if (text.includes('-')) {
+    addMessage(num1-num2, 'bot')
+}
+if (text.includes('/')) {
+    addMessage(num1/num2, 'bot')
+}
+}
+
+
+        
+    }, 1000);
+}
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+
+       
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        messageInput.addEventListener('input', () => {
+            sendButton.disabled = messageInput.value.trim() === '';
+        });
+
+        // Initial message
+        addMessage('Hello! How can I help you today?', 'bot');
+    </script>
+</body>
+</html>
